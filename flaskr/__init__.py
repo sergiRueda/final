@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api
@@ -29,7 +30,7 @@ def create_app(config_name='default'):
     app = Flask(__name__)
 
     # Configuración de la base de datos MySQL
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:WEBCRAFT001@localhost/qlocura'
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Inicialización de la base de datos y migración
