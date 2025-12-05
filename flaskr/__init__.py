@@ -23,39 +23,38 @@ from .vistas.vistas import (
 from flaskr.modelos import Usuarios
 
 
-# Inicialización de la base de datos
-# Se está importando 'db' de 'modelos.modelo' correctamente aquí.
-
 def create_app(config_name='default'):
     app = Flask(__name__)
 
-    # Configuración de la base de datos MySQL
+    # Configuración DB → ahora con Neon
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Inicialización de la base de datos y migración
+    # Inicializar DB
     db.init_app(app)
     migrate = Migrate(app, db)
 
-    # Configuración de JWT
+    # JWT
     app.config['JWT_SECRET_KEY'] = 'supersecretkey'
     jwt = JWTManager(app)
 
-    # Habilita CORS
+    # CORS
     CORS(app)
 
-    # Configuración de la API RESTful
-    api = Api(app,
-            version='1.0',
-            title='API de Qlocuri',
-            description='Documentación de la API RESTful para el sistema de pedidos Qlocuri',
-            doc='/docs')
+    # Documentación con RESTX
+    api = Api(
+        app,
+        version='1.0',
+        title='API de Qlocuri',
+        description='Documentación de la API RESTful para el sistema de pedidos Qlocuri',
+        doc='/docs'
+    )
 
-    # Rutas de autenticación
-    api.add_resource(VistaSignin, '/signin') 
-    api.add_resource(VistalogIn, '/login')   
+    # Auth
+    api.add_resource(VistaSignin, '/signin')
+    api.add_resource(VistalogIn, '/login')
 
-    # Rutas para la gestión de datos
+    # CRUDs
     api.add_resource(UsuariosResource, '/usuarios', '/usuarios/<int:id>')
     api.add_resource(ProductosResource, '/productos', '/productos/<int:id>')
     api.add_resource(PedidoResource, '/pedidos', '/pedidos/<int:id>')
@@ -65,6 +64,8 @@ def create_app(config_name='default'):
     api.add_resource(PedidoPorUsuarioYEstadoResource, '/pedidos/usuario/estado/<string:estado>')
     api.add_resource(PedidoPorUsuarioYEstadoResource, '/pedidos/usuario/estado/<string:estado>/<int:id>')
 
-
+    # 👇 CREAR TABLAS AUTOMÁTICAMENTE EN NEON (SOLO LA PRIMERA VEZ)
+    with app.app_context():
+        db.create_all()
 
     return app
